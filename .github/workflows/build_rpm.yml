@@ -1,0 +1,50 @@
+name: Build RPM
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The release version of PPOS (fedora) we are targeting.'
+        required: true
+        default: '38'
+        type: string
+      release:
+        description: 'The release number of this version. An incrementing number starting from 1.'
+        required: true
+        default: '1'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: fedora:38
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3.1.0
+    - name: Install Dependencies
+      run: dnf install -y rpmdevtools sed
+    - name: Setup Build Environment
+      run: |
+        rm -rf ~/rpmbuild/
+        rpmdev-setuptree
+        cp -r SPECS/* ~/rpmbuild/SPECS/
+        cp -r SOURCES/* ~/rpmbuild/SOURCES/
+    - name: Set Version
+      if: ${{ inputs.release }}
+      run: |
+        sed -i 's/\(Version:[[:space:]]*\)[0-9]\{1,\}/\1${{ inputs.version }}/g' ~/rpmbuild/SPECS/cert-gen.spec
+        sed -i 's/\(Release:[[:space:]]*\)[0-9]\{1,\}/\1${{ inputs.release }}/g' ~/rpmbuild/SPECS/cert-gen.spec
+    - name: Build RPM
+      run: |
+        rpmbuild -bs ~/rpmbuild/SPECS/cert-gen.spec
+        rpmbuild -bb ~/rpmbuild/SPECS/cert-gen.spec
+    - name: Archive Source RPM Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Source-RPM 
+        path: ~/rpmbuild/SRPMS/*
+    - name: Archive RPM Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: RPM 
+        path: ~/rpmbuild/RPMS/noarch/*
