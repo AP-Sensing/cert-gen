@@ -15,6 +15,8 @@ Provides:       cert-gen = %{version}-%{release}
 Requires:       openssl
 Requires:       nginx
 
+Requires(pre):  shadow-utils
+
 Source0:        %{_sourcedir}/cert-gen
 
 %description
