@@ -16,6 +16,8 @@ Requires:       openssl
 Requires:       nginx
 
 Requires(pre):  shadow-utils
+Requires(post): policycoreutils
+Requires(postun): policycoreutils
 
 Source0:        %{_sourcedir}/cert-gen
 
@@ -43,7 +45,15 @@ fi
 popd
 
 chown -R nginx:dts_cert /opt/cert/
-chcon -v -R --type=httpd_sys_content_t /opt/cert/
+
+# SELinux RPM instructions: https://fedoraproject.org/wiki/PackagingDrafts/SELinux#File_contexts
+semanage fcontext -a -t httpd_sys_content_t '/opt/cert(/.*)?' 2>/dev/null || :
+restorecon -R /opt/cert || :
+
+%postun
+if [ $1 -eq 0 ] ; then
+    semanage fcontext -d -t httpd_sys_content_t '/opt/cert(/.*)?' 2>/dev/null || :
+fi
 
 %install
 install -d -m 755 $RPM_BUILD_ROOT/opt/cert/
