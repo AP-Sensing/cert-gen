@@ -1,7 +1,7 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.0.0
-Release:        1
+Version:        1.1.0
+Release:        2
 License:        GPLv3
 Group:          Unspecified
 Summary:        A RPM package that generates upon installing a self signed certificate
@@ -30,6 +30,7 @@ A RPM package that generates upon installing a self signed certificate.
 
 %pre
 getent group dts_cert >/dev/null || groupadd -r dts_cert
+getent passwd dts >/dev/null || useradd -r -g dts_cert -d /home/dts -s /sbin/nologin -c "Main dts user account" dts
 usermod -aG dts_cert nginx
 usermod -aG dts_cert dts
 
