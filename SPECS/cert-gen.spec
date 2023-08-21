@@ -1,7 +1,7 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.1.0
-Release:        2
+Version:        1.2.0
+Release:        1
 License:        GPLv3
 Group:          Unspecified
 Summary:        A RPM package that generates upon installing a self signed certificate
@@ -13,7 +13,7 @@ Packager:       AP Sensing
 Provides:       cert-gen = %{version}-%{release}
 
 Requires:       openssl
-Requires:       nginx
+Requires:       aps-nginx
 
 Requires(pre):  shadow-utils
 Requires(post): policycoreutils
@@ -68,5 +68,8 @@ install -m 755 %{_sourcedir}/cert-gen $RPM_BUILD_ROOT/usr/bin
 %attr(755, root, root) /usr/bin/cert-gen
 
 %changelog
+* Mon Aug 21 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.2.0-1
+- Requiring aps-nginx instead of nginx 
+
 * Tue Aug 15 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.0.0-1
 - Initial release
