@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.3.0
+Version:        1.4.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -30,7 +30,7 @@ A RPM package that generates upon installing a self signed certificate.
 
 %pre
 getent group dts_cert > /dev/null || groupadd -r dts_cert
-getent passwd dts > /dev/null || useradd -r -m -g dts_cert -d /home/dts -s /sbin/nologin -c "Main dts user account" dts
+getent passwd dts > /dev/null || useradd -r -m -g dts_cert -d /home/dts -s /usr/bin/bash -c "Main dts user account" dts
 usermod -aG dts_cert nginx
 usermod -aG dts_cert dts
 
@@ -68,6 +68,9 @@ install -m 755 %{_sourcedir}/cert-gen $RPM_BUILD_ROOT/usr/bin
 %attr(755, root, root) /usr/bin/cert-gen
 
 %changelog
+* Wed Aug 23 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.4.0-1
+- Allowing login to the dts user
+
 * Tue Aug 22 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.3.0-1
 - Creating a home directory for the dts user on creation
 
