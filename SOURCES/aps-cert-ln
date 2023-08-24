@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+
+# Checks if the 'dts.crt' and 'dts.key' file exits in '/opt/cert'.
+# If not it creates a symlink to the fallback cert and key file in '/usr/share/aps/dts/cert'.
+
+pushd /opt/cert
+if [[ ! -f "dts.key" ]]; then
+    echo "'/opt/cert/dts.key' missing. Creating a symlink to the fallback file..."
+    ln -s /usr/share/aps/dts/cert/dts.key dts.key
+fi
+
+if [[ ! -f "dts.crt" ]]; then
+    echo "'/opt/cert/dts.crt' missing. Creating a symlink to the fallback file..."
+    ln -s /usr/share/aps/dts/cert/dts.crt dts.crt
+fi
+popd

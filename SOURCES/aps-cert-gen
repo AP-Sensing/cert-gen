@@ -6,4 +6,6 @@
 # Generate new private key
 # Curve prime256v1 seems to be secure: https://security.stackexchange.com/questions/78621/which-elliptic-curve-should-i-use
 openssl ecparam -name prime256v1 -genkey -out dts.key
-openssl req -new -x509 -key dts.key -sha256 -nodes -out dts.crt -days 3650 -utf8 -subj "/C=DE/ST=Baden-Württemberg/L=Böblingen/O=AP Sensing/OU=R&D/CN=$(hostname).local" # 10 Years
+
+# The certificate is valid for 10 years.
+openssl req -new -x509 -key dts.key -sha256 -nodes -out dts.crt -days 3650 -utf8 -subj "/C=DE/ST=Baden-Württemberg/L=Böblingen/O=AP Sensing/OU=R&D/CN=$(hostname).local"

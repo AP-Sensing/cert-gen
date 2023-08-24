@@ -1,0 +1,14 @@
+# Docs https://www.redhat.com/sysadmin/systemd-oneshot-service
+
+[Unit]
+Description=A simple oneshot service that executes the aps-cert-ln script
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/aps-cert-ln
+RemainAfterExit=yes
+User=dts
+Group=dts
+
+[Install]
+WantedBy=WantedBy=network.target

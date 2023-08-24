@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.4.0
+Version:        1.5.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -13,16 +13,23 @@ Packager:       AP Sensing
 Provides:       cert-gen = %{version}-%{release}
 
 Requires:       openssl
-Requires:       aps-nginx
+Requires:       systemd
 
 Requires(pre):  shadow-utils
 Requires(post): policycoreutils
 Requires(postun): policycoreutils
 
-Source0:        %{_sourcedir}/cert-gen
+%{?systemd_requires}
+
+Source0:        %{_sourcedir}/aps-cert-gen
+Source1:        %{_sourcedir}/opt_README.md
+Source2:        %{_sourcedir}/usr_README.md
+Source3:        %{_sourcedir}/aps-cert-ln
+Source4:        %{_sourcedir}/aps-cert-ln.service
+Source5:        %{_sourcedir}/42-aps-cert-ln.preset
 
 %description
-A RPM package that generates upon installing a self signed certificate.
+A RPM package that generates a self signed certificate upon installing.
 
 %prep
 
@@ -35,39 +42,76 @@ usermod -aG dts_cert nginx
 usermod -aG dts_cert dts
 
 %post
-pushd /opt/cert
-# Generate a new certificate only if there is not already one.
-# This is usefull to allow the user to replace the cert later and we do not change it then.
-if [[ ! -f "dts.key" && ! -f "dts.crt" ]]; then
-    cert-gen
-    chmod 640 dts.key
-    chmod 640 dts.crt
-fi
-popd
+pushd /usr/share/aps/dts/cert
+rm -rf dts.crt
+rm -rf dts.key
 
-chown -R nginx:dts_cert /opt/cert/
+aps-cert-gen
+
+chmod 640 dts.key
+chown nginx:dts_cert dts.key
+chmod 640 dts.crt
+chown nginx:dts_cert dts.crt
+popd
 
 # SELinux RPM instructions: https://fedoraproject.org/wiki/PackagingDrafts/SELinux#File_contexts
 semanage fcontext -a -t httpd_sys_content_t '/opt/cert(/.*)?' 2>/dev/null || :
+semanage fcontext -a -t httpd_sys_content_t '/usr/share/aps/dts/cert(/.*)?' 2>/dev/null || :
 restorecon -R /opt/cert || :
+restorecon -R /usr/share/aps/dts/cert || :
+
+# Run after creating certs to avoid conflicts
+%systemd_post aps-cert-ln.service
 
 %postun
 if [ $1 -eq 0 ] ; then
     semanage fcontext -d -t httpd_sys_content_t '/opt/cert(/.*)?' 2>/dev/null || :
+    semanage fcontext -d -t httpd_sys_content_t '/usr/share/aps/dts/cert(/.*)?' 2>/dev/null || :
 fi
 
+# Run after applying cert SELinux rules to avoid conflicts 
+%systemd_postun_with_restart aps-cert-ln.service
+
+%preun
+%systemd_preun aps-cert-ln.service
+
 %install
-install -d -m 755 $RPM_BUILD_ROOT/opt/cert/
+install -d -m 755 $RPM_BUILD_ROOT/opt/cert
+install -m 644 %{_sourcedir}/opt_README.md $RPM_BUILD_ROOT/opt/cert/README.md
+
+install -d -m 755 $RPM_BUILD_ROOT/usr/share/aps/dts/cert
+install -m 644 %{_sourcedir}/usr_README.md $RPM_BUILD_ROOT/usr/share/aps/dts/cert/README.md
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/bin/
-install -m 755 %{_sourcedir}/cert-gen $RPM_BUILD_ROOT/usr/bin
+install -m 755 %{_sourcedir}/aps-cert-gen $RPM_BUILD_ROOT/usr/bin
+install -m 755 %{_sourcedir}/aps-cert-ln $RPM_BUILD_ROOT/usr/bin
+
+install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system
+install -m 644 %{_sourcedir}/aps-cert-ln.service $RPM_BUILD_ROOT/usr/lib/systemd/system
+
+install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
+install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 
 %files
-%attr(755, nginx, dts_cert) /opt/cert/
+%dir %attr(755, nginx, dts_cert) /opt/cert
+%attr(644, nginx, dts_cert) /opt/cert/README.md
 
-%attr(755, root, root) /usr/bin/cert-gen
+%dir %attr(755, nginx, dts_cert) /usr/share/aps/dts/cert
+%attr(644, nginx, dts_cert) /usr/share/aps/dts/cert/README.md
+
+%attr(755, root, root) /usr/bin/aps-cert-gen
+%attr(755, root, root) /usr/bin/aps-cert-ln
+
+%attr(644, root, root) /usr/lib/systemd/system/aps-cert-ln.service
+
+%attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
 
 %changelog
+* Thu Aug 24 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.5.0-1
+- Certs are now stored inside '/usr/share/aps/dts/cert'.
+- '/opt/cert' contains proper replacement certificates or softlinks to the contents of '/usr/share/aps/dts/cert'.
+- Systemd onshot service for creating symlinks to the cert and key file in '/opt/cert'.
+
 * Wed Aug 23 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.4.0-1
 - Allowing login to the dts user
 
