@@ -7,8 +7,8 @@ Description=A simple oneshot service that executes the aps-cert-ln script
 Type=oneshot
 ExecStart=/usr/bin/aps-cert-ln
 RemainAfterExit=yes
-User=dts
-Group=dts
+User=root
+Group=root
 
 [Install]
-WantedBy=WantedBy=network.target
+WantedBy=network.target

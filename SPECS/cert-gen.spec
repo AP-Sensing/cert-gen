@@ -14,6 +14,7 @@ Provides:       cert-gen = %{version}-%{release}
 
 Requires:       openssl
 Requires:       systemd
+Requires:       aps-nginx
 
 Requires(pre):  shadow-utils
 Requires(post): policycoreutils
@@ -22,8 +23,7 @@ Requires(postun): policycoreutils
 %{?systemd_requires}
 
 Source0:        %{_sourcedir}/aps-cert-gen
-Source1:        %{_sourcedir}/opt_README.md
-Source2:        %{_sourcedir}/usr_README.md
+Source2:        %{_sourcedir}/README.md
 Source3:        %{_sourcedir}/aps-cert-ln
 Source4:        %{_sourcedir}/aps-cert-ln.service
 Source5:        %{_sourcedir}/42-aps-cert-ln.preset
@@ -57,7 +57,7 @@ popd
 # SELinux RPM instructions: https://fedoraproject.org/wiki/PackagingDrafts/SELinux#File_contexts
 semanage fcontext -a -t httpd_sys_content_t '/opt/cert(/.*)?' 2>/dev/null || :
 semanage fcontext -a -t httpd_sys_content_t '/usr/share/aps/dts/cert(/.*)?' 2>/dev/null || :
-restorecon -R /opt/cert || :
+# restorecon -R /opt/cert/ || : # Don't do this 
 restorecon -R /usr/share/aps/dts/cert || :
 
 # Run after creating certs to avoid conflicts
@@ -76,11 +76,8 @@ fi
 %systemd_preun aps-cert-ln.service
 
 %install
-install -d -m 755 $RPM_BUILD_ROOT/opt/cert
-install -m 644 %{_sourcedir}/opt_README.md $RPM_BUILD_ROOT/opt/cert/README.md
-
 install -d -m 755 $RPM_BUILD_ROOT/usr/share/aps/dts/cert
-install -m 644 %{_sourcedir}/usr_README.md $RPM_BUILD_ROOT/usr/share/aps/dts/cert/README.md
+install -m 644 %{_sourcedir}/README.md $RPM_BUILD_ROOT/usr/share/aps/dts/cert/README.md
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/bin/
 install -m 755 %{_sourcedir}/aps-cert-gen $RPM_BUILD_ROOT/usr/bin
@@ -93,9 +90,6 @@ install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 
 %files
-%dir %attr(755, nginx, dts_cert) /opt/cert
-%attr(644, nginx, dts_cert) /opt/cert/README.md
-
 %dir %attr(755, nginx, dts_cert) /usr/share/aps/dts/cert
 %attr(644, nginx, dts_cert) /usr/share/aps/dts/cert/README.md
 

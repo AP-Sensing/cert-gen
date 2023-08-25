@@ -3,6 +3,8 @@
 # Checks if the 'dts.crt' and 'dts.key' file exits in '/opt/cert'.
 # If not it creates a symlink to the fallback cert and key file in '/usr/share/aps/dts/cert'.
 
+mkdir -p /opt/cert
+
 pushd /opt/cert
 if [[ ! -f "dts.key" ]]; then
     echo "'/opt/cert/dts.key' missing. Creating a symlink to the fallback file..."
@@ -14,3 +16,6 @@ if [[ ! -f "dts.crt" ]]; then
     ln -s /usr/share/aps/dts/cert/dts.crt dts.crt
 fi
 popd
+
+chown -R nginx:dts_cert /opt/cert
+restorecon -R /opt/cert/
