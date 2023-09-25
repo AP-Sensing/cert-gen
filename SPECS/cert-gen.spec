@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.6.0
+Version:        1.7.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -101,7 +101,10 @@ install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/syste
 %attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
 
 %changelog
-* Thu Aug 24 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.6.0-1
+* Mon Sep 25 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.7.0-1
+- SELinux adding the httpd_sys_content_t label to /opt/cert
+
+* Mon Sep 25 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.6.0-1
 - Using the aps-dts-user RPM package for the dts user
 
 * Thu Aug 24 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.5.0-1
