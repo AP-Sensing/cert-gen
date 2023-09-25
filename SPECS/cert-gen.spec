@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.5.0
+Version:        1.6.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -15,6 +15,7 @@ Provides:       cert-gen = %{version}-%{release}
 Requires:       openssl
 Requires:       systemd
 Requires:       aps-nginx
+Requires:       aps-dts-user
 
 Requires(pre):  shadow-utils
 Requires(post): policycoreutils
@@ -37,7 +38,6 @@ A RPM package that generates a self signed certificate upon installing.
 
 %pre
 getent group dts_cert > /dev/null || groupadd -r dts_cert
-getent passwd dts > /dev/null || useradd -r -m -g dts_cert -d /home/dts -s /usr/bin/bash -c "Main dts user account" dts
 usermod -aG dts_cert nginx
 usermod -aG dts_cert dts
 
@@ -101,6 +101,9 @@ install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/syste
 %attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
 
 %changelog
+* Thu Aug 24 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.6.0-1
+- Using the aps-dts-user RPM package for the dts user
+
 * Thu Aug 24 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.5.0-1
 - Certs are now stored inside '/usr/share/aps/dts/cert'.
 - '/opt/cert' contains proper replacement certificates or softlinks to the contents of '/usr/share/aps/dts/cert'.
