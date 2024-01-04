@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.7.0
+Version:        1.8.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -16,8 +16,9 @@ Requires:       openssl
 Requires:       systemd
 Requires:       aps-nginx
 Requires:       aps-dts-user
+Requires:       (systemd or systemd-standalone-sysusers)
 
-Requires(pre):  shadow-utils
+Requires(pre): (systemd or systemd-standalone-sysusers)
 Requires(post): policycoreutils
 Requires(postun): policycoreutils
 
@@ -28,6 +29,8 @@ Source2:        %{_sourcedir}/README.md
 Source3:        %{_sourcedir}/aps-cert-ln
 Source4:        %{_sourcedir}/aps-cert-ln.service
 Source5:        %{_sourcedir}/42-aps-cert-ln.preset
+Source6:        %{_sourcedir}/dts_cert_group.conf
+Source7:        %{_sourcedir}/dts_dts_cert_group_assignment.conf
 
 %description
 A RPM package that generates a self signed certificate upon installing.
@@ -37,9 +40,10 @@ A RPM package that generates a self signed certificate upon installing.
 %build
 
 %pre
-getent group dts_cert > /dev/null || groupadd -r dts_cert
-usermod -aG dts_cert nginx
-usermod -aG dts_cert dts
+# Only add the group during post. The users will be added during the next boot to the group.
+# Why? Since we only can create the dts user during boot, else he would be broken and sudo would not work.
+# Need more information? Take a look at the aps-dts-user spec file.
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts_cert_group.conf
 
 %post
 pushd /usr/share/aps/dts/cert
@@ -89,6 +93,10 @@ install -m 644 %{_sourcedir}/aps-cert-ln.service $RPM_BUILD_ROOT/usr/lib/systemd
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 
+install -d -m 755 $RPM_BUILD_ROOT/usr/lib/sysusers.d/
+install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_cert_group.conf
+install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
+
 %files
 %dir %attr(755, nginx, dts_cert) /usr/share/aps/dts/cert
 %attr(644, nginx, dts_cert) /usr/share/aps/dts/cert/README.md
@@ -100,7 +108,13 @@ install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/syste
 
 %attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
 
+%attr(644, root, root) /usr/lib/sysusers.d/dts_cert_group.conf
+%attr(644, root, root) /usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
+
 %changelog
+* Thu Jan 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.8.0-1
+- Switched to systemd-sysusers
+
 * Mon Sep 25 2023 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.7.0-1
 - SELinux adding the httpd_sys_content_t label to /opt/cert
 
