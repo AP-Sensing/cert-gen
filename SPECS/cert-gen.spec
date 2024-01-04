@@ -1,7 +1,7 @@
 BuildArch:      noarch
 Name:           cert-gen
 Version:        1.8.0
-Release:        1
+Release:        2
 License:        GPLv3
 Group:          Unspecified
 Summary:        A RPM package that generates upon installing a self signed certificate
@@ -95,7 +95,7 @@ install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/syste
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/sysusers.d/
 install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_cert_group.conf
-install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
+install -m 644 %{_sourcedir}/dts_dts_cert_group_assignment.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
 
 %files
 %dir %attr(755, nginx, dts_cert) /usr/share/aps/dts/cert
@@ -112,6 +112,9 @@ install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysuser
 %attr(644, root, root) /usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
 
 %changelog
+* Thu Jan 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.8.0-2
+- Fixed file install for 'dts_dts_cert_group_assignment.conf'
+
 * Thu Jan 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.8.0-1
 - Switched to systemd-sysusers
 
