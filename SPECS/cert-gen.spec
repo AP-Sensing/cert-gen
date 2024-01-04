@@ -1,7 +1,7 @@
 BuildArch:      noarch
 Name:           cert-gen
 Version:        1.8.0
-Release:        2
+Release:        3
 License:        GPLv3
 Group:          Unspecified
 Summary:        A RPM package that generates upon installing a self signed certificate
@@ -15,7 +15,7 @@ Provides:       cert-gen = %{version}-%{release}
 Requires:       openssl
 Requires:       systemd
 Requires:       aps-nginx
-Requires:       aps-dts-user
+Requires:       aps-dts-user >= 1.2.1
 Requires:       (systemd or systemd-standalone-sysusers)
 
 Requires(pre): (systemd or systemd-standalone-sysusers)
@@ -112,6 +112,9 @@ install -m 644 %{_sourcedir}/dts_dts_cert_group_assignment.conf $RPM_BUILD_ROOT/
 %attr(644, root, root) /usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
 
 %changelog
+* Thu Jan 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.8.0-3
+- Requiring aps-dts-user >= 1.2.1
+
 * Thu Jan 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.8.0-2
 - Fixed file install for 'dts_dts_cert_group_assignment.conf'
 
