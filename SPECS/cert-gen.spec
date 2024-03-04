@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.10.0
+Version:        1.12.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -43,7 +43,10 @@ A RPM package that generates a self signed certificate upon installing.
 # Only add the group during post. The users will be added during the next boot to the group.
 # Why? Since we only can create the dts user during boot, else he would be broken and sudo would not work.
 # Need more information? Take a look at the aps-dts-user spec file.
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts.conf
 /usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts-cert_group.conf
+# Needs to happen here since else the dts user would not be part of the dts-cert group
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %post
 pushd /usr/share/aps/dts/cert
@@ -112,6 +115,12 @@ install -m 644 %{_sourcedir}/dts_dts-cert_group_assignment.conf $RPM_BUILD_ROOT/
 %attr(644, root, root) /usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %changelog
+* Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.12.0-1
+- Fixed adding the 'dts' and 'nginx' user to the 'dts-cert' group
+
+* Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.11.0-1
+- Added a 'aps-cert-group-setup' systemd service that takes care of keeping groups in sync for rpm-ostree
+
 * Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.10.0-1
 - Renamed the 'dts_cert' (GID 823) group to 'dts-cert' (GID 831) to avoid group name issues with systemd-sysusers
 - Ref: https://gitlab.bbn.apsensing.com/infrastructure/ppos/ppos/-/issues/55
