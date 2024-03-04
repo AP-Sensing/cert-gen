@@ -1,3 +1,4 @@
 # Definition: https://www.freedesktop.org/software/systemd/man/systemd.preset.html
 
 enable aps-cert-ln.service
+enable aps-cert-group-setup.service

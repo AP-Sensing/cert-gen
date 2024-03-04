@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.10.0
+Version:        1.11.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -24,13 +24,15 @@ Requires(postun): policycoreutils
 
 %{?systemd_requires}
 
-Source0:        %{_sourcedir}/aps-cert-gen
-Source2:        %{_sourcedir}/README.md
+Source0:        %{_sourcedir}/README.md
+Source1:        %{_sourcedir}/aps-cert-gen
+Source2:        %{_sourcedir}/aps-cert-group-setup
 Source3:        %{_sourcedir}/aps-cert-ln
 Source4:        %{_sourcedir}/aps-cert-ln.service
-Source5:        %{_sourcedir}/42-aps-cert-ln.preset
-Source6:        %{_sourcedir}/dts-cert_group.conf
-Source7:        %{_sourcedir}/dts_dts-cert_group_assignment.conf
+Source5:        %{_sourcedir}/aps-cert-group-setup.service
+Source6:        %{_sourcedir}/42-aps-cert-gen.preset
+Source7:        %{_sourcedir}/dts-cert_group.conf
+Source8:        %{_sourcedir}/dts_dts-cert_group_assignment.conf
 
 %description
 A RPM package that generates a self signed certificate upon installing.
@@ -66,6 +68,7 @@ restorecon -R /usr/share/aps/dts/cert || :
 
 # Run after creating certs to avoid conflicts
 %systemd_post aps-cert-ln.service
+%systemd_post aps-cert-group-setup.service
 
 %postun
 if [ $1 -eq 0 ] ; then
@@ -75,9 +78,11 @@ fi
 
 # Run after applying cert SELinux rules to avoid conflicts 
 %systemd_postun_with_restart aps-cert-ln.service
+%systemd_postun_with_restart aps-cert-group-setup.service
 
 %preun
 %systemd_preun aps-cert-ln.service
+%systemd_preun aps-cert-group-setup.service
 
 %install
 install -d -m 755 $RPM_BUILD_ROOT/usr/share/aps/dts/cert
@@ -86,12 +91,14 @@ install -m 644 %{_sourcedir}/README.md $RPM_BUILD_ROOT/usr/share/aps/dts/cert/RE
 install -d -m 755 $RPM_BUILD_ROOT/usr/bin/
 install -m 755 %{_sourcedir}/aps-cert-gen $RPM_BUILD_ROOT/usr/bin
 install -m 755 %{_sourcedir}/aps-cert-ln $RPM_BUILD_ROOT/usr/bin
+install -m 755 %{_sourcedir}/aps-cert-group-setup $RPM_BUILD_ROOT/usr/bin
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system
 install -m 644 %{_sourcedir}/aps-cert-ln.service $RPM_BUILD_ROOT/usr/lib/systemd/system
+install -m 644 %{_sourcedir}/aps-cert-group-setup.service $RPM_BUILD_ROOT/usr/lib/systemd/system
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
-install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
+install -m 644 %{_sourcedir}/42-aps-cert-gen.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/sysusers.d/
 install -m 644 %{_sourcedir}/dts-cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts-cert_group.conf
@@ -103,15 +110,20 @@ install -m 644 %{_sourcedir}/dts_dts-cert_group_assignment.conf $RPM_BUILD_ROOT/
 
 %attr(755, root, root) /usr/bin/aps-cert-gen
 %attr(755, root, root) /usr/bin/aps-cert-ln
+%attr(755, root, root) /usr/bin/aps-cert-group-setup
 
 %attr(644, root, root) /usr/lib/systemd/system/aps-cert-ln.service
+%attr(644, root, root) /usr/lib/systemd/system/aps-cert-group-setup.service
 
-%attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
+%attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-gen.preset
 
 %attr(644, root, root) /usr/lib/sysusers.d/dts-cert_group.conf
 %attr(644, root, root) /usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %changelog
+* Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.11.0-1
+- Added a 'aps-cert-group-setup' systemd service that takes care of keeping groups in sync for rpm-ostree
+
 * Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.10.0-1
 - Renamed the 'dts_cert' (GID 823) group to 'dts-cert' (GID 831) to avoid group name issues with systemd-sysusers
 - Ref: https://gitlab.bbn.apsensing.com/infrastructure/ppos/ppos/-/issues/55

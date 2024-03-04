@@ -1,0 +1,15 @@
+# Docs https://www.redhat.com/sysadmin/systemd-oneshot-service
+
+[Unit]
+Description=A simple oneshot service that executes the aps-cert-group-setup script
+After=systemd-sysusers.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/aps-cert-group-setup
+RemainAfterExit=yes
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
