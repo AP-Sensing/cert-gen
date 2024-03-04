@@ -17,6 +17,6 @@ if [[ ! -f "dts.crt" ]]; then
 fi
 popd
 
-chown -R nginx:dts_cert /opt/cert
+chown -R nginx:dts-cert /opt/cert
 restorecon -R /opt/cert/
 chcon -v -R --type=httpd_sys_content_t /opt/cert/

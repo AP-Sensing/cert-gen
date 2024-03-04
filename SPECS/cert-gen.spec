@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.9.0
+Version:        1.10.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -29,8 +29,8 @@ Source2:        %{_sourcedir}/README.md
 Source3:        %{_sourcedir}/aps-cert-ln
 Source4:        %{_sourcedir}/aps-cert-ln.service
 Source5:        %{_sourcedir}/42-aps-cert-ln.preset
-Source6:        %{_sourcedir}/dts_cert_group.conf
-Source7:        %{_sourcedir}/dts_dts_cert_group_assignment.conf
+Source6:        %{_sourcedir}/dts-cert_group.conf
+Source7:        %{_sourcedir}/dts_dts-cert_group_assignment.conf
 
 %description
 A RPM package that generates a self signed certificate upon installing.
@@ -43,7 +43,7 @@ A RPM package that generates a self signed certificate upon installing.
 # Only add the group during post. The users will be added during the next boot to the group.
 # Why? Since we only can create the dts user during boot, else he would be broken and sudo would not work.
 # Need more information? Take a look at the aps-dts-user spec file.
-/usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts_cert_group.conf
+/usr/bin/systemd-sysusers /usr/lib/sysusers.d/dts-cert_group.conf
 
 %post
 pushd /usr/share/aps/dts/cert
@@ -53,9 +53,9 @@ rm -rf dts.key
 aps-cert-gen
 
 chmod 640 dts.key
-chown nginx:dts_cert dts.key
+chown nginx:dts-cert dts.key
 chmod 640 dts.crt
-chown nginx:dts_cert dts.crt
+chown nginx:dts-cert dts.crt
 popd
 
 # SELinux RPM instructions: https://fedoraproject.org/wiki/PackagingDrafts/SELinux#File_contexts
@@ -94,12 +94,12 @@ install -d -m 755 $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 install -m 644 %{_sourcedir}/42-aps-cert-ln.preset $RPM_BUILD_ROOT/usr/lib/systemd/system-preset
 
 install -d -m 755 $RPM_BUILD_ROOT/usr/lib/sysusers.d/
-install -m 644 %{_sourcedir}/dts_cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_cert_group.conf
-install -m 644 %{_sourcedir}/dts_dts_cert_group_assignment.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
+install -m 644 %{_sourcedir}/dts-cert_group.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts-cert_group.conf
+install -m 644 %{_sourcedir}/dts_dts-cert_group_assignment.conf $RPM_BUILD_ROOT/usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %files
-%dir %attr(755, nginx, dts_cert) /usr/share/aps/dts/cert
-%attr(644, nginx, dts_cert) /usr/share/aps/dts/cert/README.md
+%dir %attr(755, nginx, dts-cert) /usr/share/aps/dts/cert
+%attr(644, nginx, dts-cert) /usr/share/aps/dts/cert/README.md
 
 %attr(755, root, root) /usr/bin/aps-cert-gen
 %attr(755, root, root) /usr/bin/aps-cert-ln
@@ -108,10 +108,14 @@ install -m 644 %{_sourcedir}/dts_dts_cert_group_assignment.conf $RPM_BUILD_ROOT/
 
 %attr(644, root, root) /usr/lib/systemd/system-preset/42-aps-cert-ln.preset
 
-%attr(644, root, root) /usr/lib/sysusers.d/dts_cert_group.conf
-%attr(644, root, root) /usr/lib/sysusers.d/dts_dts_cert_group_assignment.conf
+%attr(644, root, root) /usr/lib/sysusers.d/dts-cert_group.conf
+%attr(644, root, root) /usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %changelog
+* Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.10.0-1
+- Renamed the 'dts_cert' (GID 823) group to 'dts-cert' (GID 831) to avoid group name issues with systemd-sysusers
+- Ref: https://gitlab.bbn.apsensing.com/infrastructure/ppos/ppos/-/issues/55
+
 * Fri Mar 01 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.9.0-1
 - Using a fixed group ID (823) for the 'dts_cert' group
 
