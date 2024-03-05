@@ -1,6 +1,6 @@
 BuildArch:      noarch
 Name:           cert-gen
-Version:        1.12.0
+Version:        1.13.0
 Release:        1
 License:        GPLv3
 Group:          Unspecified
@@ -115,6 +115,9 @@ install -m 644 %{_sourcedir}/dts_dts-cert_group_assignment.conf $RPM_BUILD_ROOT/
 %attr(644, root, root) /usr/lib/sysusers.d/dts_dts-cert_group_assignment.conf
 
 %changelog
+* Tue Mar 05 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.13.0-1
+- Switched from prime256v1 to secp521r1 as they are considered to be more secure
+
 * Mon Mar 04 2024 Fabian Sauter <fabian.sauter+rpm@apsensing.com> - 1.12.0-1
 - Fixed adding the 'dts' and 'nginx' user to the 'dts-cert' group
 
